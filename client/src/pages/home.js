@@ -11,22 +11,38 @@ const App = () => {
     const [pageCount, setPageCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
     const [tableName, setTableName] = useState('');
+    const [tables, setTables] = useState([]); // List of uploaded tables
 
     const handleFileChange = (e) => setFile(e.target.files[0]);
 
     const handleUpload = async () => {
+        if (!file) return;
         const formData = new FormData();
         formData.append('file', file);
         try {
             const response = await axios.post('http://localhost:5000/upload', formData);
             if (response.status === 200) {
-                const name = file.name.split('.')[0];
-                setTableName(name);
-                fetchColumns(name);
+                fetchTables();
             }
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const fetchTables = async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/get_tables');
+            setTables(res.data.tables);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleTableSelect = async (e) => {
+        const selectedTable = e.target.value;
+        setTableName(selectedTable);
+        fetchColumns(selectedTable);
+        fetchData(0, selectedTable);
     };
 
     const fetchColumns = async (name) => {
@@ -35,11 +51,11 @@ const App = () => {
         setFilters({});
     };
 
-    const fetchData = async (page = 0) => {
-        if (!tableName) return;
+    const fetchData = async (page = 0, table = tableName) => {
+        if (!table) return;
 
-        const res = await axios.post(`http://localhost:5000/filter_data`, {
-            table_name: tableName,
+        const res = await axios.post('http://localhost:5000/filter_data', {
+            table_name: table,
             filters,
             page: page + 1,
             limit: 10,
@@ -54,20 +70,29 @@ const App = () => {
         fetchData(event.selected);
     };
 
-    // Debounce filter changes to prevent excessive API calls
     const debouncedFilterChange = debounce((column, value) => {
         setFilters((prevFilters) => ({ ...prevFilters, [column]: value }));
+        fetchData(0);
     }, 500);
 
     useEffect(() => {
-        if (file) fetchData(currentPage);
-    }, [currentPage, filters]);
+        fetchTables();
+    }, []);
 
     return (
         <div>
-            <h1>Data Visualization with Filters</h1>
+            <h1>Data Visualization</h1>
+
             <input type="file" onChange={handleFileChange} />
             <button onClick={handleUpload}>Upload</button>
+
+            <h3>Select Table</h3>
+            <select onChange={handleTableSelect} value={tableName}>
+                <option value="">-- Select Table --</option>
+                {tables.map((table, index) => (
+                    <option key={index} value={table}>{table}</option>
+                ))}
+            </select>
 
             {columns.length > 0 && (
                 <div>

@@ -13,11 +13,22 @@ db = pymysql.connect(
     user="root",
     password="",
     database="datavis",
-    cursorclass=pymysql.cursors.DictCursor  # Fetch results as dictionaries
+    cursorclass=pymysql.cursors.DictCursor  
 )
 
 print("Connected to database 'datavis'")
 
+
+@app.route('/get_tables', methods=['GET'])
+def get_tables():
+    try:
+        cursor = db.cursor()
+        cursor.execute("SHOW TABLES;")
+        tables = [row[f"Tables_in_{db.db.decode()}"] for row in cursor.fetchall()]
+        return jsonify({'tables': tables}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -72,6 +83,10 @@ def table_schema():
         return jsonify({'columns': schema}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+    
+    
+        
 
 @app.route('/filter_data', methods=['POST'])
 def filter_data():
@@ -105,6 +120,9 @@ def filter_data():
         return jsonify({'data': rows, 'total_records': total_records}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

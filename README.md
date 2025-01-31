@@ -111,7 +111,7 @@ Tech Stack
 
 Frontend: React.js, React Paginate
 
-Backend: Node.js, Express.js, SQL
+Backend: Python, flask ,SQL
 
 Database: MySQL / SQL Server
 

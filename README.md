@@ -111,7 +111,7 @@ Tech Stack
 
 Frontend: React.js, React Paginate
 
-Backend: Node.js, Express.js, SQL
+Backend: Python, flask ,SQL
 
 Database: MySQL / SQL Server
 
@@ -119,7 +119,7 @@ Installation
 
 1. Clone the repository
 
- git clone https://github.com/your-username/your-repo.git
+ git clone https://github.com/Talal-q19/Data-visualization.git
 
 2. Install dependencies
 

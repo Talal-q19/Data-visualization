@@ -3,6 +3,10 @@ import axios from 'axios';
 import ReactPaginate from 'react-paginate';
 import { debounce } from 'lodash';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import logo from '../images/logo.jpeg'
+import { Break } from 'three/tsl';
+
+
 
 const App = () => {
     const [file, setFile] = useState(null);
@@ -84,85 +88,109 @@ const App = () => {
     }, []);
 
     return (
-        <div className="container mt-4">
-            <h1 className="text-center mb-4">Data Visualization</h1>
+        
 
-            {/* File Upload Section */}
-            <div className="mb-4 d-flex align-items-center gap-2">
-                <input type="file" className="form-control" onChange={handleFileChange} />
-                <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
-            </div>
-
-            {/* Table Selection */}
-            <div className="mb-4">
-                <h3>Select Table</h3>
-                <select className="form-select" onChange={handleTableSelect} value={tableName}>
-                    <option value="">-- Select Table --</option>
-                    {tables.map((table, index) => (
-                        <option key={index} value={table}>{table}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Filters */}
-            {columns.length > 0 && (
-                <div className="mb-4">
-                    <h3>Filters</h3>
-                    <div className="row">
-                        {columns.map((col) => (
-                            <div className="col-md-3 mb-2" key={col}>
-                                <label className="form-label">{col}</label>
-                                <input 
-    type="text" 
-    className="form-control" 
-    onChange={(e) => handleFilterChange(col, e.target.value)} 
-/>
-
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Data Table */}
-            <div className="table-responsive">
-                <table className="table table-bordered table-striped">
-                    <thead className="table-dark">
-                        <tr>{data.length > 0 && Object.keys(data[0]).map((col) => <th key={col}>{col}</th>)}</tr>
-                    </thead>
-                    <tbody>
-                        {data.map((row, index) => (
-                            <tr key={index}>
-                                {Object.values(row).map((val, i) => <td key={i}>{val}</td>)}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-            <nav>
-                <ul className="pagination justify-content-center">
-                    <ReactPaginate
-                        previousLabel={'«'}
-                        nextLabel={'»'}
-                        breakLabel={'...'}
-                        pageCount={pageCount}
-                        onPageChange={handlePageClick}
-                        containerClassName={'pagination'}
-                        pageClassName={'page-item'}
-                        pageLinkClassName={'page-link'}
-                        previousClassName={'page-item'}
-                        previousLinkClassName={'page-link'}
-                        nextClassName={'page-item'}
-                        nextLinkClassName={'page-link'}
-                        breakClassName={'page-item'}
-                        breakLinkClassName={'page-link'}
-                        activeClassName={'active'}
-                    />
-                </ul>
-            </nav>
+        <div>
+    <nav className="navbar navbar-dark bg-dark" style={{height: '60px', padding: '20px'}}>
+      <div className="container-fluid">
+        <a className="navbar-brand" href="#">
+         <a className="navbar-brand" href="/">
+           <img src={logo} alt="Logo" width="40px" height="40px" style={{position: 'relative', top: '-37px', left: '-20px'}} />
+         </a>
+        </a>
+        <div className="d-flex justify-content-center align-items-center">
+          <h1 className="text-white" style={{fontSize: '32px', width: '950px' , height: '100px', marginTop: '-10px'}}>Data Visualization</h1>
         </div>
+        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <a className="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  
+        <div className="container mt-4">
+     <br></br>
+  
+          {/* File Upload Section */}
+          <div className="mb-4 d-flex align-items-center gap-2">
+            <input type="file" className="form-control" onChange={handleFileChange} />
+            <button className="btn btn-dark" onClick={handleUpload}>Upload</button>
+          </div>
+  
+          {/* Table Selection */}
+          <div className="mb-4">
+            <h3>Select Table</h3>
+            <select className="form-select" onChange={handleTableSelect} value={tableName}>
+              <option value="">-- Select Table --</option>
+              {tables.map((table, index) => (
+                <option key={index} value={table}>{table}</option>
+              ))}
+            </select>
+          </div>
+  
+          {/* Filters */}
+          {columns.length > 0 && (
+            <div className="mb-4">
+              <h3>Filters</h3>
+              <div className="row">
+                {columns.map((col) => (
+                  <div className="col-md-3 mb-2" key={col}>
+                    <label className="form-label">{col}</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      onChange={(e) => handleFilterChange(col, e.target.value)} 
+                    />
+  
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+  
+          {/* Data Table */}
+          <div className="table-responsive">
+            <table className="table table-bordered table-striped">
+              <thead className="table-dark">
+                <tr>{data.length > 0 && Object.keys(data[0]).map((col) => <th key={col}>{col}</th>)}</tr>
+              </thead>
+              <tbody>
+                {data.map((row, index) => (
+                  <tr key={index}>
+                    {Object.values(row).map((val, i) => <td key={i}>{val}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+  
+          {/* Pagination */}
+          <nav>
+            <ul className="pagination justify-content-center">
+              <ReactPaginate
+                previousLabel={'«'}
+                nextLabel={'»'}
+                breakLabel={'...'}
+                pageCount={pageCount}
+                onPageChange={handlePageClick}
+                containerClassName={'pagination'}
+                pageClassName={'page-item'}
+                pageLinkClassName={'page-link'}
+                previousClassName={'page-item'}
+                previousLinkClassName={'page-link'}
+                nextClassName={'page-item'}
+                nextLinkClassName={'page-link'}
+                breakClassName={'page-item'}
+                breakLinkClassName={'page-link'}
+                activeClassName={'active'}
+              />
+            </ul>
+          </nav>
+        </div>
+      </div>
     );
 };
 

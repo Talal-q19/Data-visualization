@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import pandas as pd
 import pymysql
@@ -6,12 +6,17 @@ import traceback
 from pymysql.converters import escape_string
 from dotenv import load_dotenv
 import os
+from flask_session import Session
+from flask import Response
+
+from flask import jsonify
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
 
 # Database Configuration from .env
 DB_CONFIG = {
@@ -48,6 +53,64 @@ class DatabasePool:
 pool = DatabasePool()
 
 print(f"Connected to database '{DB_CONFIG['database']}' at {DB_CONFIG['host']}")
+
+
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
+Session(app)
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username, password = data.get("username"), data.get("password")
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+
+    try:
+        conn = pool.get_conn()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT username FROM users WHERE username = %s AND password = %s", (username, password))
+        user = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if user:
+            session['user'] = username  # Store session
+            print(f"Session set for user: {session['user']}")  # Debug log
+            return jsonify({"message": "Login successful"}), 200
+        else:
+            return jsonify({"error": "Invalid credentials"}), 401
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+@app.route('/check_session', methods=['GET'])
+def check_session():
+    if 'user' in session:
+        session.modified = True  # Update the session object
+        return jsonify({"user": session['user']}), 200, {'Content-Type': 'application/json'}
+    return jsonify({"error": "Not authenticated"}), 401, {'Content-Type': 'application/json'}
+
+
+
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({"message": "Logged out successfully"}), 200
+
+
 
 @app.route('/get_tables', methods=['GET'])
 def get_tables():

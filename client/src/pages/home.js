@@ -87,29 +87,36 @@ const App = () => {
         fetchTables();
     }, []);
 
+    const handleLogout = async () => {
+      try {
+          await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });
+          window.location.href = '/login';  // Redirect after logout
+      } catch (error) {
+          alert('Logout failed');
+      }
+  };
+
+
+
+  
+
     return (
         
 
         <div>
-    <nav className="navbar navbar-dark bg-dark" style={{height: '60px', padding: '20px'}}>
-      <div className="container-fluid">
-        <a className="navbar-brand" href="#">
+   <nav className="navbar navbar-dark bg-dark" style={{ height: '60px', padding: '20px' }}>
+     <div className="container-fluid">
+       <a className="navbar-brand" href="#">
          <a className="navbar-brand" href="/">
-           <img src={logo} alt="Logo" width="40px" height="40px" style={{position: 'relative', top: '-37px', left: '-20px'}} />
+           <img src={logo} alt="Logo" width="40px" height="40px" style={{ position: 'relative', top: '-37px', left: '-20px' }} />
          </a>
-        </a>
-        <div className="d-flex justify-content-center align-items-center">
-          <h1 className="text-white" style={{fontSize: '32px', width: '950px' , height: '100px', marginTop: '-10px'}}>Data Visualization</h1>
-        </div>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+       </a>
+       <div className="d-flex justify-content-center align-items-center">
+         <h1 className="text-white" style={{ fontSize: '32px', width: '300px', height: '100px', marginTop: '-10px' }}>Data Visualization</h1>
+       </div>
+       <button className="btn btn-light" style={{ border: 'none', padding: '4px 16px', fontSize: '16px',marginTop: '-70px'  }} onClick={handleLogout}>Logout</button>
+     </div>
+   </nav>
   
         <div className="container mt-4">
      <br></br>
@@ -189,8 +196,11 @@ const App = () => {
               />
             </ul>
           </nav>
+          
         </div>
+      
       </div>
+      
     );
 };
 

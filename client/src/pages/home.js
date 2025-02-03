@@ -4,7 +4,7 @@ import ReactPaginate from 'react-paginate';
 import { debounce } from 'lodash';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../images/logo.jpeg'
-import { Break } from 'three/tsl';
+import { Link } from 'react-router-dom';
 
 
 
@@ -96,6 +96,24 @@ const App = () => {
       }
   };
 
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/check_session", {
+      method: "GET",
+      credentials: "include", // Required for cookies to be sent
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Session Data:", data); // Log response data
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => console.error("Error fetching session:", err));
+  }, []);
+
+
 
 
   
@@ -104,19 +122,36 @@ const App = () => {
         
 
         <div>
-   <nav className="navbar navbar-dark bg-dark" style={{ height: '60px', padding: '20px' }}>
-     <div className="container-fluid">
-       <a className="navbar-brand" href="#">
-         <a className="navbar-brand" href="/">
-           <img src={logo} alt="Logo" width="40px" height="40px" style={{ position: 'relative', top: '-37px', left: '-20px' }} />
-         </a>
-       </a>
-       <div className="d-flex justify-content-center align-items-center">
-         <h1 className="text-white" style={{ fontSize: '32px', width: '300px', height: '100px', marginTop: '-10px' }}>Data Visualization</h1>
-       </div>
-       <button className="btn btn-light" style={{ border: 'none', padding: '4px 16px', fontSize: '16px',marginTop: '-70px'  }} onClick={handleLogout}>Logout</button>
-     </div>
-   </nav>
+  <nav className="navbar navbar-dark bg-dark" style={{ height: "60px", padding: "20px" }}>
+      <div className="container-fluid">
+        <a className="navbar-brand" href="/">
+          <img
+            src={logo}
+            alt="Logo"
+            width="40px"
+            height="40px"
+            style={{ position: "relative", top: "-37px", left: "-20px" }}
+          />
+        </a>
+        <div className="d-flex justify-content-center align-items-center">
+          <h1 className="text-white" style={{ fontSize: "32px", width: "300px", height: "100px", marginTop: "-10px" , marginLeft: "400px" }}>
+           Table View
+          </h1>
+        </div>
+        <div className="d-flex align-items-center">
+       
+        {user && <span className="text-white me-3" style={{ fontSize: "18px" , marginTop: "-70px"}}>Username: {user}</span>}
+        
+        <Link to="/graph" className="btn btn-light" style={{ border: "none", padding: "4px 16px", fontSize: "16px", marginTop: "-70px" }}>Graphical view </Link>
+        <span style={{ margin: "0 5px" }}></span>
+        <button className="btn btn-light" style={{ border: "none", padding: "4px 16px", fontSize: "16px", marginTop: "-70px" }} onClick={handleLogout}>
+          Logout
+        </button>
+        
+  
+        </div>
+      </div>
+    </nav>
   
         <div className="container mt-4">
      <br></br>

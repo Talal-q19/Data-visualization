@@ -18,6 +18,7 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 
+
 # Database Configuration from .env
 DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
@@ -63,6 +64,35 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 Session(app)
 
+@app.route('/table_summary', methods=['GET'])
+def table_summary():
+    try:
+        table_name = escape_string(request.args.get('table_name'))
+        if not table_name:
+            return jsonify({'error': 'Table name is required'}), 400
+
+        conn = pool.get_conn()
+        cursor = conn.cursor(dictionary=True)
+
+        # Get column names
+        cursor.execute(f"DESCRIBE `{table_name}`;")
+        columns = [row['Field'] for row in cursor.fetchall()]
+
+        # Get summary data
+        summary = {}
+        for column in columns:
+            cursor.execute(f"SELECT `{column}`, COUNT(*) as count FROM `{table_name}` GROUP BY `{column}`;")
+            summary[column] = cursor.fetchall()
+
+        cursor.close()
+        pool.release(conn)
+
+        return jsonify({'summary': summary}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -98,8 +128,9 @@ def login():
 def check_session():
     if 'user' in session:
         session.modified = True  # Update the session object
-        return jsonify({"user": session['user']}), 200, {'Content-Type': 'application/json'}
-    return jsonify({"error": "Not authenticated"}), 401, {'Content-Type': 'application/json'}
+        return jsonify({"user": session['user']}), 200
+    return jsonify({"error": "Not authenticated"}), 401
+
 
 
 
@@ -119,14 +150,18 @@ def get_tables():
         cursor = conn.cursor()
 
         cursor.execute("SHOW TABLES;")
-        tables = [row[f"Tables_in_{conn.db.decode()}"] for row in cursor.fetchall()]
+        all_tables = [row[f"Tables_in_{conn.db.decode()}"] for row in cursor.fetchall()]
+
+        # Exclude only the 'users' table
+        filtered_tables = [table for table in all_tables if table != "users"]
 
         cursor.close()
         pool.release(conn)
 
-        return jsonify({'tables': tables}), 200
+        return jsonify({'tables': filtered_tables}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

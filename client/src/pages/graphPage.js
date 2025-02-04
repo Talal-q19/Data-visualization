@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom';
 import logo from '../images/logo.jpeg';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 
 Chart.register(...registerables);
 
@@ -13,11 +12,8 @@ const GraphPage = () => {
     const [tableName, setTableName] = useState('');
     const [tables, setTables] = useState([]);
     const [columns, setColumns] = useState([]);
-    const [filters, setFilters] = useState({});
-    const [data, setData] = useState([]);
-    const [chartType, setChartType] = useState('Bar');
-    const [xAxis, setXAxis] = useState('');
-    const [yAxis, setYAxis] = useState('');
+    const [data, setData] = useState({});
+    const [chartTypes, setChartTypes] = useState({});
 
     useEffect(() => {
         fetchTables();
@@ -42,48 +38,18 @@ const GraphPage = () => {
     const fetchColumns = async (name) => {
         const res = await axios.get(`http://localhost:5000/table_schema?table_name=${name}`);
         setColumns(res.data.columns);
-        setFilters({});
     };
 
-    const fetchData = async (table, activeFilters = filters) => {
+    const fetchData = async (table) => {
         if (!table) return;
-
-        const res = await axios.post('http://localhost:5000/filter_data', {
-            table_name: table,
-            filters: activeFilters,
-        });
-
-        setData(res.data.data);
+        const res = await axios.get(`http://localhost:5000/table_summary?table_name=${table}`);
+        setData(res.data.summary);
     };
 
-    const handleFilterChange = (column, value) => {
-        const newFilters = { ...filters, [column]: value };
-        setFilters(newFilters);
-        fetchData(tableName, newFilters);
+    const handleChartTypeChange = (column, type) => {
+        setChartTypes((prev) => ({ ...prev, [column]: type }));
     };
 
-    const handleXAxisChange = (e) => {
-        setXAxis(e.target.value);
-    };
-
-    const handleYAxisChange = (e) => {
-        setYAxis(e.target.value);
-    };
-
-    const chartData = {
-        labels: data.map((item) => item[xAxis]),
-        datasets: [{
-            label: yAxis,
-            data: data.map((item) => {
-                const value = item[yAxis];
-                // If the value is numeric, return it, otherwise return null (skipping non-numeric values)
-                return isNaN(value) ? null : value;
-            }).filter(value => value !== null),  // Remove null values (non-numeric)
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9966FF'],
-            borderColor: 'rgba(75,192,192,1)',
-            borderWidth: 1,
-        }],
-    };
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -111,7 +77,7 @@ const GraphPage = () => {
 
     return (
         <div>
-      <nav className="navbar navbar-dark bg-dark" style={{ height: "60px", padding: "20px" }}>
+            <nav className="navbar navbar-dark bg-dark" style={{ height: "60px", padding: "20px" }}>
           <div className="container-fluid">
             <a className="navbar-brand" href="/">
               <img
@@ -178,7 +144,7 @@ const GraphPage = () => {
             </div>
           </div>
         </nav>
-
+            
             <div className="container mt-4">
                 <h3>Select Table</h3>
                 <select className="form-select mb-3" onChange={handleTableSelect} value={tableName}>
@@ -188,60 +154,40 @@ const GraphPage = () => {
                     ))}
                 </select>
 
-                {columns.length > 0 && (
-                    <div className="mb-4">
-                        <h3>Filters</h3>
-                        <div className="row">
-                            {columns.map((col) => (
-                                <div className="col-md-3 mb-2" key={col}>
-                                    <label className="form-label">{col}</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        onChange={(e) => handleFilterChange(col, e.target.value)}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {data.length > 0 && (
+                {Object.keys(data).length > 0 && (
                     <div>
-                        <h3>Graph Representation</h3>
-                        <select className="form-select mb-3" onChange={(e) => setChartType(e.target.value)} value={chartType}>
-                            <option value="Bar">Bar Chart</option>
-                            <option value="Line">Line Chart</option>
-                            <option value="Pie">Pie Chart</option>
-                            <option value="Doughnut">Doughnut Chart</option>
-                        </select>
+                        <h3>Graphical Representation</h3>
+                        {columns.map((col, index) => (
+                            <div key={index} className="mb-4">
+                                <h4>{col}</h4>
+                                <select className="form-select mb-2" onChange={(e) => handleChartTypeChange(col, e.target.value)} value={chartTypes[col] || ''}>
+                                    <option value="">-- Select Chart Type --</option>
+                                    <option value="Bar">Bar Chart</option>
+                                    <option value="Line">Line Chart</option>
+                                    <option value="Pie">Pie Chart</option>
+                                    <option value="Doughnut">Doughnut Chart</option>
+                                </select>
+                                {data[col] && chartTypes[col] && (
+                                    (() => {
+                                        const chartData = {
+                                            labels: data[col].map(item => item[col]),
+                                            datasets: [{
+                                                label: col,
+                                                data: data[col].map(item => item.count),
+                                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9966FF'],
+                                            }],
+                                        };
 
-                        <div className="mb-3">
-                            <h4>Select X Axis</h4>
-                            <select className="form-select" onChange={handleXAxisChange} value={xAxis}>
-                                <option value="">-- Select X Axis --</option>
-                                {columns.map((col, index) => (
-                                    <option key={index} value={col}>{col}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-3">
-                            <h4>Select Y Axis</h4>
-                            <select className="form-select" onChange={handleYAxisChange} value={yAxis}>
-                                <option value="">-- Select Y Axis --</option>
-                                {columns.map((col, index) => (
-                                    <option key={index} value={col}>{col}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-4">
-                            {chartType === 'Bar' && <Bar data={chartData} />}
-                            {chartType === 'Line' && <Line data={chartData} />}
-                            {chartType === 'Pie' && <Pie data={chartData} />}
-                            {chartType === 'Doughnut' && <Doughnut data={chartData} />}
-                        </div>
+                                        switch (chartTypes[col]) {
+                                            case 'Line': return <Line data={chartData} />;
+                                            case 'Pie': return <Pie data={chartData} />;
+                                            case 'Doughnut': return <Doughnut data={chartData} />;
+                                            default: return <Bar data={chartData} />;
+                                        }
+                                    })()
+                                )}
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

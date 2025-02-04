@@ -4,6 +4,7 @@ import ReactPaginate from 'react-paginate';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../images/logo.jpeg';
 import { Link } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const TableSummaryPage = () => {
     const [tableName, setTableName] = useState('');

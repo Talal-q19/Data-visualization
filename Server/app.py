@@ -65,6 +65,41 @@ app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 Session(app)
 
 
+@app.route('/table_summary_extended', methods=['GET'])
+def table_summary_extended():
+    try:
+        table_name = request.args.get('table_name')
+        if not table_name:
+            return jsonify({'error': 'Table name is required'}), 400
+
+        conn = pool.get_conn()
+        cursor = conn.cursor()
+
+        # Get column names and data types
+        cursor.execute(f"DESCRIBE `{table_name}`;")
+        columns_info = cursor.fetchall()
+        columns = {row['Field']: row['Type'] for row in columns_info}
+
+        summary = {}
+        for column, col_type in columns.items():
+            cursor.execute(f"SELECT `{column}`, COUNT(*) as count FROM `{table_name}` GROUP BY `{column}`;")
+            values = cursor.fetchall()
+
+            # Detect if column is numeric
+            is_numeric = any(char.isdigit() for char in col_type)  # Basic check for numeric types
+
+            summary[column] = {
+                "type": "numeric" if is_numeric else "categorical",
+                "data": values
+            }
+
+        cursor.close()
+        pool.release(conn)
+
+        return jsonify({'summary': summary}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/table_summary', methods=['GET'])
@@ -94,6 +129,8 @@ def table_summary():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
 
 
 

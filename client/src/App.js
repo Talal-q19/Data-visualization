@@ -5,6 +5,7 @@ import Login from './pages/login';
 import axios from 'axios';
 import { Navigate } from 'react-router-dom';
 import GraphPage from './pages/graphPage';
+import SummaryPage from './pages/summaryPage';
 
 const ProtectedRoute = ({ element }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -30,6 +31,7 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<ProtectedRoute element={<Home />} />} />
                 <Route path="/graph" element={<ProtectedRoute element={<GraphPage />} />} />
+                <Route path="/summary" element={<ProtectedRoute element={<SummaryPage />} />} />
                 <Route path="/login" element={<Login />} />
             </Routes>
         </Router>

@@ -142,11 +142,53 @@ const App = () => {
        
         {user && <span className="text-white me-3" style={{ fontSize: "18px" , marginTop: "-70px"}}>Username: {user}</span>}
         
-        <Link to="/graph" className="btn btn-light" style={{ border: "none", padding: "4px 16px", fontSize: "16px", marginTop: "-70px" }}>Graphical view </Link>
+       <Link to="/graph" className="btn" style={{ 
+         border: "none", 
+         padding: "4px 16px", 
+         fontSize: "16px", 
+         marginTop: "-70px",
+         backgroundColor: "#ffffff",
+         color: "#000000"
+        }}>
+         <i className="fas fa-chart-line" style={{ marginRight: "8px" }}></i>
+         Graphical view
+       </Link>
+
+
         <span style={{ margin: "0 5px" }}></span>
-        <button className="btn btn-light" style={{ border: "none", padding: "4px 16px", fontSize: "16px", marginTop: "-70px" }} onClick={handleLogout}>
-          Logout
-        </button>
+
+
+         <Link to="/summary" className="btn btn-light" style={{ 
+           border: "none", 
+           padding: "4px 16px", 
+           fontSize: "16px", 
+           marginTop: "-70px"
+          }}>
+           <i className="fas fa-file-alt" style={{ marginRight: "8px" }}></i>
+           Summary
+         </Link>
+
+
+
+                           <span style={{ margin: "0 5px" }}></span>
+
+
+                           
+                           <button
+             className="btn btn-danger"
+             style={{
+               border: "none",
+               padding: "4px 16px",
+               fontSize: "16px",
+               marginTop: "-70px",
+               backgroundColor: "#dc3545",
+               color: "#ffffff"
+             }}
+             onClick={handleLogout}
+           >
+             <i className="fas fa-sign-out-alt" style={{ marginRight: "8px" }}></i>
+             Logout
+           </button>
         
   
         </div>

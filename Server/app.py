@@ -64,15 +64,18 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 Session(app)
 
+
+
+
 @app.route('/table_summary', methods=['GET'])
 def table_summary():
     try:
-        table_name = escape_string(request.args.get('table_name'))
+        table_name = request.args.get('table_name')
         if not table_name:
             return jsonify({'error': 'Table name is required'}), 400
 
         conn = pool.get_conn()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
 
         # Get column names
         cursor.execute(f"DESCRIBE `{table_name}`;")
@@ -91,6 +94,7 @@ def table_summary():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 
 @app.route('/login', methods=['POST'])

@@ -8,8 +8,13 @@ from dotenv import load_dotenv
 import os
 from flask_session import Session
 from flask import Response
-
 from flask import jsonify
+
+from sklearn.ensemble import IsolationForest
+from itertools import combinations
+import numpy as np
+from scipy import stats
+
 
 # Load environment variables
 load_dotenv()
@@ -63,6 +68,207 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 Session(app)
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+
+    try:
+        conn = pool.get_conn()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+        conn.commit()
+        pool.release(conn)
+        return jsonify({"message": "User registered successfully"}), 201
+    except pymysql.err.IntegrityError:
+        return jsonify({"error": "Username already exists"}), 409
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Cramér's V for categorical data
+def cramers_v(x, y):
+    contingency_table = pd.crosstab(x, y)
+    chi2, p, dof, expected = stats.chi2_contingency(contingency_table)
+    n = contingency_table.sum().sum()
+    phi2 = chi2 / n
+    r, k = contingency_table.shape
+    return (phi2 / min(k - 1, r - 1)) ** 0.5
+
+@app.route('/analyze_table', methods=['GET'])
+def analyze_table():
+    table_name = request.args.get('table_name')
+    if not table_name:
+        return jsonify({'error': 'Table name is required'}), 400
+    
+    try:
+        conn = pool.get_conn()
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `{table_name}`;")
+            rows = cursor.fetchall()
+        
+        pool.release(conn)
+
+        # Create DataFrame from the fetched rows
+        df = pd.DataFrame(rows)
+
+        # Debug: Print fetched rows to check their structure
+        print("Fetched Rows: ", rows)
+
+        # Convert all columns to the appropriate types and handle missing data
+        df = df.apply(pd.to_numeric, errors='ignore')  # Convert numeric columns
+        df = df.replace({None: np.nan, 'NULL': np.nan, '': np.nan})  # Replace None, 'NULL', and '' with NaN
+
+        # Insights initialization
+        insights = []
+
+        # Missing Data Detection - Check entire rows with any missing data
+        missing_data_rows = df[df.isnull().any(axis=1)]  # Get rows with missing data
+        missing_data = missing_data_rows.isnull().sum().to_dict()
+
+        # Log missing data in the same format as duplicates
+        missing_data_log = []
+        for _, row in missing_data_rows.iterrows():
+            missing_data_log.append({
+                **{k: (v if pd.notna(v) else None) for k, v in row.to_dict().items()},  # Replace NaN with None
+                'missing_reason': 'Missing data detected'
+            })
+
+        # Duplicate Detection (Entire row duplicates)
+        duplicate_data = df.duplicated(keep=False).sum()  # Detect entire row duplicates
+        duplicates = df[df.duplicated(keep=False)]  # Get all duplicate rows
+
+        # Most Common Values & Pattern Recognition
+        common_patterns = {col: df[col].mode()[0] if not df[col].mode().empty else None for col in df.columns}
+
+        # Anomaly detection (for numeric columns and unrealistic dates)
+        anomalies = []
+        if not df.empty:
+            # Handle numeric columns for anomaly detection
+            numeric_cols = df.select_dtypes(include=['number']).columns
+            if len(numeric_cols) > 0:
+                iso_forest = IsolationForest(contamination=0.05)  # Adjust contamination rate if needed
+                df[numeric_cols] = df[numeric_cols].fillna(0)  # Fill missing numeric data with 0
+                anomaly_preds = iso_forest.fit_predict(df[numeric_cols])  # Anomaly prediction
+
+                # Collect anomalies (rows with anomaly_preds == -1)
+                anomalies += df[anomaly_preds == -1].apply(lambda row: {
+                    **{k: (v if pd.notna(v) else None) for k, v in row.to_dict().items()},  # Replace NaN with None
+                    'anomaly_reason': f"Numeric outlier detected"
+                }, axis=1).tolist()
+
+            # Handle date columns for unrealistic dates
+            date_cols = df.select_dtypes(include=['datetime']).columns
+            if len(date_cols) > 0:
+                for col in date_cols:
+                    # Check for unrealistic dates (e.g., far future or far past dates)
+                    unrealistic_dates = df[col].apply(lambda x: x.year < 1900 or x.year > 2100 if pd.notnull(x) else False)
+                    anomalies += df[unrealistic_dates].apply(lambda row: {
+                        **{k: (v if pd.notna(v) else None) for k, v in row.to_dict().items()},  # Replace NaN with None
+                        'anomaly_reason': f"Unrealistic date detected in column '{col}'"
+                    }, axis=1).tolist()
+
+            # Explicitly add duplicate rows to anomalies (entire row duplicates)
+            for _, row in duplicates.iterrows():
+                anomalies.append({
+                    **{k: (v if pd.notna(v) else None) for k, v in row.to_dict().items()},  # Replace NaN with None
+                    'anomaly_reason': "Duplicate row detected"
+                })
+
+            # Include rows with missing data as anomalies (rows with missing values)
+            for _, row in missing_data_rows.iterrows():
+                anomalies.append({
+                    **{k: (v if pd.notna(v) else None) for k, v in row.to_dict().items()},  # Replace NaN with None
+                    'anomaly_reason': f"Missing data detected in row"
+                })
+
+        else:
+            anomalies = []
+
+        # Correlation Analysis
+        correlations = []
+
+        # Numerical Correlation (using Pearson)
+        numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
+        if numerical_cols:
+            numerical_corr = df[numerical_cols].corr(method='pearson')  # or 'spearman'
+            numerical_corr_dict = numerical_corr.to_dict()
+            correlations.append({
+                'correlation_type': 'Numerical',
+                'correlation_matrix': numerical_corr_dict
+            })
+
+        # Categorical Correlation (using Cramér's V)
+        categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+        if categorical_cols:
+            for col1, col2 in combinations(categorical_cols, 2):
+                cramer_v = cramers_v(df[col1], df[col2])
+                correlations.append({
+                    'correlation_type': 'Categorical',
+                    'columns': (col1, col2),
+                    'correlation_score': cramer_v
+                })
+
+        # General Insights
+        for col in df.columns:
+            pattern = common_patterns.get(col, 'N/A')
+
+            insights.append({
+                'column': col,
+                'missing_values': missing_data.get(col, 0),
+                'duplicates': duplicate_data,
+                'most_common': common_patterns.get(col, 'N/A'),
+                'pattern': pattern,
+                'insight_type': 'General',
+                'details': f"{missing_data.get(col, 0)} missing values, {duplicate_data} duplicates.",
+                'suggested_action': (
+                    'Fill missing values' if missing_data.get(col, 0) > 0 and duplicate_data == 0 
+                    else 'Remove duplicates' if duplicate_data > 0 and missing_data.get(col, 0) == 0 
+                    else 'Fill missing values, remove duplicates, and check anomalies.' if missing_data.get(col, 0) > 0 and duplicate_data > 0 
+                    else 'No suggestions'
+                )
+            })
+
+        # Convert int64 to int (to avoid large int issues in JSON response)
+        def convert_int64_to_int(obj):
+            if isinstance(obj, dict):
+                return {k: convert_int64_to_int(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_int64_to_int(v) for v in obj]
+            elif isinstance(obj, np.int64):
+                return int(obj)
+            else:
+                return obj
+
+        # Prepare missing data in the same format as duplicates
+        missing_data_formatted = [
+            {'column': col, 'missing_count': missing_data.get(col, 0) if missing_data.get(col, 0) != np.nan else 0}
+            for col in df.columns if missing_data.get(col, 0) > 0
+        ]
+
+        return jsonify(convert_int64_to_int({
+            'insights': insights,
+            'correlations': correlations,
+            'anomalies': anomalies,  # Anomalies without anomaly_score column
+            'duplicates': duplicates.to_dict(),
+            'missing_data': missing_data_formatted,  # Added missing data to response in similar format as duplicates
+            'logged_missing_data': missing_data_log  # Log of missing data in the response
+        })), 200
+
+    except Exception as e:
+        error_trace = traceback.format_exc()
+        print(error_trace)
+        return jsonify({'error': str(e), 'trace': error_trace}), 500
+
+
+
+
+
+
 
 
 @app.route('/table_summary_extended', methods=['GET'])
@@ -161,6 +367,8 @@ def login():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
 
 
 

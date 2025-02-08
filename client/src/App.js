@@ -6,6 +6,11 @@ import axios from 'axios';
 import { Navigate } from 'react-router-dom';
 import GraphPage from './pages/graphPage';
 import SummaryPage from './pages/summaryPage';
+import InsightsPage from './pages/InsightsPage';
+import LandingPage from './pages/Ulanding';
+import NLandingPage from './pages/landing';
+import SignUp from './pages/signup';
+
 
 const ProtectedRoute = ({ element }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -29,9 +34,13 @@ const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<ProtectedRoute element={<Home />} />} />
+            <Route path="/" element={<NLandingPage />} />
+            <Route path="/signup" element={<SignUp />} />
+                <Route path="/land" element={<ProtectedRoute element={<LandingPage />} />} />
                 <Route path="/graph" element={<ProtectedRoute element={<GraphPage />} />} />
                 <Route path="/summary" element={<ProtectedRoute element={<SummaryPage />} />} />
+                <Route path="/insight" element={<ProtectedRoute element={<InsightsPage />} />} />
+                <Route path="/table" element={<ProtectedRoute element={<Home />} />} />
                 <Route path="/login" element={<Login />} />
             </Routes>
         </Router>

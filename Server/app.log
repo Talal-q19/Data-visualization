@@ -1,0 +1,158 @@
+2025-02-07 14:25:55,392 - WARNING -  * Debugger is active!
+2025-02-07 14:25:55,396 - INFO -  * Debugger PIN: 144-559-580
+2025-02-07 14:25:58,602 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:58] "GET /check_session HTTP/1.1" 200 -
+2025-02-07 14:25:58,854 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:58] "GET /check_session HTTP/1.1" 200 -
+2025-02-07 14:25:58,913 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:58] "GET /get_tables HTTP/1.1" 200 -
+2025-02-07 14:25:58,915 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:58] "GET /check_session HTTP/1.1" 200 -
+2025-02-07 14:25:59,162 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:59] "GET /check_session HTTP/1.1" 200 -
+2025-02-07 14:25:59,164 - INFO - 127.0.0.1 - - [07/Feb/2025 14:25:59] "GET /get_tables HTTP/1.1" 200 -
+2025-02-07 14:26:00,766 - INFO - Fetched 102 rows from table organizations-100
+2025-02-07 14:26:00,887 - INFO - Analysis completed for organizations-100. Insights: 9, Anomalies: 10
+2025-02-07 14:26:00,903 - ERROR - Error analyzing table organizations-100: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "C:\Users\Anigma PC\Documents\GitHub\Data-visualization\Server\app.py", line 160, in analyze_table
+    return jsonify({
+           ~~~~~~~^^
+        'insights': insights,
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        'missing_data': missing_data_log
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    }), 200
+    ^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\__init__.py", line 170, in jsonify
+    return current_app.json.response(*args, **kwargs)  # type: ignore[return-value]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 214, in response
+    f"{self.dumps(obj, **dump_args)}\n", mimetype=self.mimetype
+       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type int64 is not JSON serializable
+
+2025-02-07 14:26:00,904 - INFO - 127.0.0.1 - - [07/Feb/2025 14:26:00] "[35m[1mGET /analyze_table?table_name=organizations-100 HTTP/1.1[0m" 500 -
+2025-02-07 14:50:39,485 - INFO - Fetched 102 rows from table organizations-100
+2025-02-07 14:50:39,631 - INFO - Analysis completed for organizations-100. Insights: 9, Anomalies: 10
+2025-02-07 14:50:39,632 - ERROR - Error analyzing table organizations-100: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "C:\Users\Anigma PC\Documents\GitHub\Data-visualization\Server\app.py", line 160, in analyze_table
+    return jsonify({
+           ~~~~~~~^^
+        'insights': insights,
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        'missing_data': missing_data_log
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    }), 200
+    ^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\__init__.py", line 170, in jsonify
+    return current_app.json.response(*args, **kwargs)  # type: ignore[return-value]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 214, in response
+    f"{self.dumps(obj, **dump_args)}\n", mimetype=self.mimetype
+       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type int64 is not JSON serializable
+
+2025-02-07 14:50:39,633 - INFO - 127.0.0.1 - - [07/Feb/2025 14:50:39] "[35m[1mGET /analyze_table?table_name=organizations-100 HTTP/1.1[0m" 500 -
+2025-02-07 14:50:43,553 - INFO - Fetched 102 rows from table organizations-100
+2025-02-07 14:50:43,662 - INFO - Analysis completed for organizations-100. Insights: 9, Anomalies: 10
+2025-02-07 14:50:43,663 - ERROR - Error analyzing table organizations-100: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "C:\Users\Anigma PC\Documents\GitHub\Data-visualization\Server\app.py", line 160, in analyze_table
+    return jsonify({
+           ~~~~~~~^^
+        'insights': insights,
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        'missing_data': missing_data_log
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    }), 200
+    ^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\__init__.py", line 170, in jsonify
+    return current_app.json.response(*args, **kwargs)  # type: ignore[return-value]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 214, in response
+    f"{self.dumps(obj, **dump_args)}\n", mimetype=self.mimetype
+       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type int64 is not JSON serializable
+
+2025-02-07 14:50:43,664 - INFO - 127.0.0.1 - - [07/Feb/2025 14:50:43] "[35m[1mGET /analyze_table?table_name=organizations-100 HTTP/1.1[0m" 500 -
+2025-02-07 14:52:13,384 - INFO - Fetched 100 rows from table people-100
+2025-02-07 14:52:13,496 - INFO - Analysis completed for people-100. Insights: 0, Anomalies: 5
+2025-02-07 14:52:13,496 - INFO - 127.0.0.1 - - [07/Feb/2025 14:52:13] "GET /analyze_table?table_name=people-100 HTTP/1.1" 200 -
+2025-02-07 14:52:15,970 - INFO - Fetched 100 rows from table people-100
+2025-02-07 14:52:16,090 - INFO - Analysis completed for people-100. Insights: 0, Anomalies: 5
+2025-02-07 14:52:16,090 - INFO - 127.0.0.1 - - [07/Feb/2025 14:52:16] "GET /analyze_table?table_name=people-100 HTTP/1.1" 200 -
+2025-02-07 14:52:16,955 - INFO - Fetched 100 rows from table people-100
+2025-02-07 14:52:17,060 - INFO - Analysis completed for people-100. Insights: 0, Anomalies: 5
+2025-02-07 14:52:17,060 - INFO - 127.0.0.1 - - [07/Feb/2025 14:52:17] "GET /analyze_table?table_name=people-100 HTTP/1.1" 200 -
+2025-02-07 14:52:20,165 - INFO - Fetched 102 rows from table organizations-100
+2025-02-07 14:52:20,278 - INFO - Analysis completed for organizations-100. Insights: 9, Anomalies: 10
+2025-02-07 14:52:20,279 - ERROR - Error analyzing table organizations-100: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "C:\Users\Anigma PC\Documents\GitHub\Data-visualization\Server\app.py", line 160, in analyze_table
+    return jsonify({
+           ~~~~~~~^^
+        'insights': insights,
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        'missing_data': missing_data_log
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    }), 200
+    ^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\__init__.py", line 170, in jsonify
+    return current_app.json.response(*args, **kwargs)  # type: ignore[return-value]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 214, in response
+    f"{self.dumps(obj, **dump_args)}\n", mimetype=self.mimetype
+       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Anigma PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\json\provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type int64 is not JSON serializable
+
+2025-02-07 14:52:20,280 - INFO - 127.0.0.1 - - [07/Feb/2025 14:52:20] "[35m[1mGET /analyze_table?table_name=organizations-100 HTTP/1.1[0m" 500 -
+2025-02-07 14:52:33,858 - INFO -  * Detected change in 'C:\\Users\\Anigma PC\\Documents\\GitHub\\Data-visualization\\Server\\app.py', reloading

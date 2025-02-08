@@ -121,75 +121,52 @@ const TableSummaryPage = () => {
 
     return (
         <div>
-            {/* Navbar */}
-             <nav className="navbar navbar-dark bg-dark" style={{ height: "60px", padding: "20px" }}>
-                 <div className="container-fluid">
-                   <a className="navbar-brand" href="/">
-                     <img
-                       src={logo}
-                       alt="Logo"
-                       width="40px"
-                       height="40px"
-                       style={{ position: "relative", top: "-37px", left: "-20px" }}
-                     />
-                   </a>
-                   <div className="d-flex justify-content-center align-items-center">
-                     <h1 className="text-white" style={{ fontSize: "32px", width: "300px", height: "100px", marginTop: "-10px" , marginLeft: "400px" }}>
-                      Summary View
-                     </h1>
-                   </div>
-                   <div className="d-flex align-items-center">
-                  
-                   {user && <span className="text-white me-3" style={{ fontSize: "18px" , marginTop: "-70px"}}>Username: {user}</span>}
-                    <Link to="/" className="btn btn-light" style={{ 
-                               border: "none", 
-                               padding: "4px 16px", 
-                               fontSize: "16px", 
-                               marginTop: "-70px"
-                              }}>
-                               <i className="fas fa-table" style={{ marginRight: "8px" }}></i>
-                               Table view
-                             </Link>
-
-
-
-                   <span style={{ margin: "0 5px" }}></span>
-
-
-                  <Link to="/graph" className="btn" style={{ 
-         border: "none", 
-         padding: "4px 16px", 
-         fontSize: "16px", 
-         marginTop: "-70px",
-         backgroundColor: "#ffffff",
-         color: "#000000"
-        }}>
-         <i className="fas fa-chart-line" style={{ marginRight: "8px" }}></i>
-         Graphical view
-       </Link>
-                   
-                   <span style={{ margin: "0 5px" }}></span>
-                   <button
-             className="btn btn-danger"
-             style={{
-               border: "none",
-               padding: "4px 16px",
-               fontSize: "16px",
-               marginTop: "-70px",
-               backgroundColor: "#dc3545",
-               color: "#ffffff"
-             }}
-             onClick={handleLogout}
-           >
-             <i className="fas fa-sign-out-alt" style={{ marginRight: "8px" }}></i>
-             Logout
-           </button>
-
-                   
-             
-                   </div>
+             {/* Navbar */}
+           <nav className="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+             <div className="container d-flex justify-content-between">
+               {/* Logo on the left */}
+               <div className="d-flex align-items-center">
+                 <a className="navbar-brand d-flex align-items-center" href="/">
+                   <img src={logo} alt="Logo" width="50" height="50" className="me-2" />
+                 </a>
+               </div>
+           
+               {/* Navbar Toggler */}
+               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                 <span className="navbar-toggler-icon"></span>
+               </button>
+           
+               {/* Navbar Links */}
+               <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
+                 <ul className="navbar-nav me-auto">
+                   <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
+                   <li className="nav-item"><Link to="/table" className="nav-link">Reports</Link></li>
+                   <li className="nav-item"><Link to="/insight" className="nav-link">Insights</Link></li>
+                   <li className="nav-item"><Link to="/graph" className="nav-link">Graphs</Link></li>
+                   <li className="nav-item"><Link to="/summary" className="nav-link">Summary</Link></li>
+                 </ul>
+           
+                 {/* Username and Logout Box */}
+                 <div className="d-flex align-items-center">
+                   {user ? (
+                     <div className="d-flex align-items-center p-2 border rounded-3 text-white">
+                       <span className="me-3">{user}</span> {/* Display username */}
+                       <button className="btn btn-light btn-sm" onClick={handleLogout}>Logout</button>
+                     </div>
+                   ) : (
+                     <div className="d-flex align-items-center p-2 border rounded-3 text-white">
+                       <span className="me-3">Guest</span> {/* Display Guest when no user */}
+                     </div>
+                   )}
                  </div>
-               </nav>
+           
+                 {/* Login Link when no user */}
+                 {!user && (
+                   <li className="nav-item ms-3"><Link to="/login" className="nav-link">Login</Link></li>
+                 )}
+               </div>
+             </div>
+           </nav>
 
             {/* Main Content */}
             <div className="container mt-4">

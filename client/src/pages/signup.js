@@ -91,8 +91,8 @@ const SignUp = () => {
                             <button type="submit" className="btn btn-dark w-100">Sign Up</button>
                         </form>
                         <div className="text-center mt-3">
-                            <p className="text-white">Already have an account? <Link to="/login" className="text-light">Login</Link></p>
-                        </div>
+                        <a href="/login" className="text-muted">Already have an account? Login</a>
+                    </div>
                     </div>
                 </Fade>
             </div>

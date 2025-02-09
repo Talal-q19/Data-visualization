@@ -83,7 +83,7 @@ const Login = () => {
                         <button type="submit" className="btn btn-dark w-100">Login</button>
                     </form>
                     <div className="text-center mt-3">
-                        <a href="/signup" className="text-muted">not a user? Sign Up</a>
+                        <a href="/signup" className="text-muted">Not a user? Sign Up</a>
                     </div>
                 </div>
             </Fade>

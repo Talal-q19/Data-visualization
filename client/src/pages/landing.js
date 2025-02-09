@@ -142,7 +142,7 @@ const NLandingPage = () => {
           </Fade>
 
             {/* Features Section */}
-        <section className="container my-5">
+        <section className="container  my-5">
           <div className="row">
             <div className="col-md-4 text-center" style={{ height: '200px' }}>
               <Fade left duration={1000}>
@@ -168,8 +168,23 @@ const NLandingPage = () => {
           </div>
         </section>
 
+          {/* Data Transformation Animation */}
+          <section className="text-center my-5 bg-light" style={{  paddingTop: '50px' , paddingBottom: '50px'}}>
+        <Fade bottom duration={1000}>
+          <h2>How Your Data Evolves</h2>
+          <p>From raw numbers to meaningful insights—experience the power of AI-driven analysis.</p>
+          <div className="data-animation">
+            <span className="data-block">101</span>
+            <span className="data-block">202</span>
+            <span className="data-block">303</span>
+            <span className="arrow">➡️</span>
+            <i className="fas fa-chart-bar fa-3x text-warning"></i>
+          </div>
+        </Fade>
+      </section>
+
             {/* How It Works Section */}
-          <section className="bg-light py-5">
+          <section className=" py-5">
             <div className="container">
               <h2 className="text-center mb-4">How It Works</h2>
               <div className="row text-center d-flex justify-content-between">
@@ -232,6 +247,30 @@ const NLandingPage = () => {
                     </div>
                 </Fade>
             </footer>
+              {/* CSS Styles */}
+      <style>
+        {`
+          .data-animation {
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 20px;
+          }
+          .data-block {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            animation: bounce 1s infinite alternate;
+          }
+          @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-10px); }
+          }
+        `}
+      </style>
         </div>
     );
 };

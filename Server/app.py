@@ -14,6 +14,7 @@ from sklearn.ensemble import IsolationForest
 from itertools import combinations
 import numpy as np
 from scipy import stats
+from sqlalchemy import text
 
 
 # Load environment variables
@@ -364,6 +365,37 @@ def check_session():
     return jsonify({"error": "Not authenticated"}), 401
 
 
+@app.route('/update_record', methods=['POST'])
+def update_record():
+    data = request.json
+    table_name = data.get('table_name')
+    column_name = data.get('column_name')
+    new_value = data.get('new_value')
+    record_id = data.get('record_id')
+
+    if not all([table_name, column_name, record_id]):
+        return jsonify({"error": "All fields are required"}), 400
+
+    # If the new_value is empty, set it to None (NULL)
+    if new_value == "":
+        new_value = None
+
+    try:
+        query = "UPDATE `{}` SET {} = %s WHERE id = %s".format(table_name, column_name)
+        conn = pool.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(query, (new_value, record_id))
+        conn.commit()
+        return jsonify({"message": "Record updated successfully"}), 200
+    except Exception as e:
+        print(f"Error updating record: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'conn' in locals():
+            pool.release(conn)
+
+
+            
 
 
 
@@ -414,6 +446,7 @@ def get_tables():
 
 
 
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -445,13 +478,22 @@ def upload_file():
             pool.release(conn)
             return jsonify({'error': f'Table {table_name} already exists'}), 400
 
+        # Escape column names with backticks
         columns = [f"`{escape_string(col.replace(' ', '_'))}` TEXT" for col in df.columns.tolist()]
-        create_table_query = f"CREATE TABLE `{table_name}` ({', '.join(columns)});"
+        
+        # Create the table with an 'id' column as the primary key
+        create_table_query = f"""
+            CREATE TABLE `{table_name}` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,  -- Adding the 'id' column
+                {', '.join(columns)}
+            );
+        """
         cursor.execute(create_table_query)
 
+        # Insert data into the table with escaped column names
         for _, row in df.iterrows():
             placeholders = ', '.join(['%s'] * len(row))
-            insert_query = f"INSERT INTO `{table_name}` VALUES ({placeholders});"
+            insert_query = f"INSERT INTO `{table_name}` ({', '.join([f'`{escape_string(col.replace(' ', '_'))}`' for col in df.columns])}) VALUES ({placeholders});"
             cursor.execute(insert_query, tuple(row))
 
         conn.commit()
@@ -465,6 +507,7 @@ def upload_file():
         error_trace = traceback.format_exc()
         print(error_trace)
         return jsonify({'error': str(e), 'trace': error_trace}), 500
+
 
 
 @app.route('/table_schema', methods=['GET'])

@@ -67,9 +67,9 @@ useEffect(() => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("Session Data:", data); // Log response data
-      if (data.user) {
-        setUser(data.user); // Set the user data in state
+      console.log(`Session Data for User ${data.user_id}:`, data); // Log response data with user ID
+      if (data.user_id) {
+        setUser(data.username);
       }
     })
     .catch((err) => console.error("Error fetching session:", err));

@@ -20,13 +20,15 @@ const GraphPage = () => {
     }, []);
 
     const fetchTables = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/get_tables');
-            setTables(res.data.tables);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+      try {
+          const res = await axios.get('http://localhost:5000/get_tables', {
+              withCredentials: true,  // Ensures session cookie is sent with the request
+          });
+          setTables(res.data.tables);
+      } catch (error) {
+          console.error('Error fetching tables:', error);
+      }
+  };
 
     const handleTableSelect = async (e) => {
         const selectedTable = e.target.value;
@@ -52,20 +54,20 @@ const GraphPage = () => {
 
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-      fetch("http://localhost:5000/check_session", {
-        method: "GET",
-        credentials: "include", // Required for cookies to be sent
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Session Data:", data); // Log response data
-          if (data.user) {
-            setUser(data.user);
-          }
-        })
-        .catch((err) => console.error("Error fetching session:", err));
-    }, []);
+ useEffect(() => {
+   fetch("http://localhost:5000/check_session", {
+     method: "GET",
+     credentials: "include", // Required for cookies to be sent
+   })
+     .then((res) => res.json())
+     .then((data) => {
+       console.log(`Session Data for User ${data.user_id}:`, data); // Log response data with user ID
+       if (data.user_id) {
+         setUser(data.username);
+       }
+     })
+     .catch((err) => console.error("Error fetching session:", err));
+ }, []);
     const handleLogout = async () => {
         try {
             await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });

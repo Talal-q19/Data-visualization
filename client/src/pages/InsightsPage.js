@@ -17,48 +17,73 @@ const InsightsPage = () => {
 
   useEffect(() => {
     fetchTables();
-    fetchUserSession();
+ 
   }, []);
 
-  const fetchUserSession = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/check_session", { withCredentials: true });
-      if (res.data.user) setUser(res.data.user);
-    } catch (error) {
-      console.error("Error fetching session:", error);
-    }
-  };
-
-  const fetchTables = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/get_tables');
-      setTables(res.data.tables);
-    } catch (error) {
-      console.error('Error fetching tables:', error);
-    }
-  };
-
-const fetchInsights = async () => {
-  if (!selectedTable) return;
+ 
+useEffect(() => {
+  fetch("http://localhost:5000/check_session", {
+    method: "GET",
+    credentials: "include", // Required for cookies to be sent
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(`Session Data for User ${data.user_id}:`, data); // Log response data with user ID
+      if (data.user_id) {
+        setUser(data.username);
+      }
+    })
+    .catch((err) => console.error("Error fetching session:", err));
+}, []);
+const fetchTables = async () => {
   try {
-    const res = await axios.get(`http://localhost:5000/analyze_table?table_name=${selectedTable}`);
-    
-    // Debug log the response data
-    console.log("Fetched Insights:", res.data);
-    
-    // Ensure res.data is properly structured
-    const data = res.data || {};
-    setInsights(data.insights || []);
-    setCorrelations(data.correlations || []);
-    setAnomalies(data.anomalies || []);
-    
-    // Ensure insights is an array before calculating page count
-    setPageCount(Math.ceil((data.insights?.length || 0) / 10));
+      const res = await axios.get('http://localhost:5000/get_tables', {
+          withCredentials: true,  // Ensures session cookie is sent with the request
+      });
+      setTables(res.data.tables);
   } catch (error) {
-    console.error('Error fetching insights:', error);
+      console.error('Error fetching tables:', error);
   }
 };
 
+  const fetchInsights = async () => {
+    if (!selectedTable) return;
+  
+    try {
+      const res = await axios.get(`http://localhost:5000/analyze_table?table_name=${selectedTable}`);
+  
+      // Debug log the response data
+      console.log("Fetched Insights Response:", res.data);
+  
+      // Ensure res.data is structured properly
+      const data = res.data || {};
+  
+      // Additional debug logs
+      console.log("Insights:", data.insights || []);
+      console.log("Correlations:", data.correlations || []);
+      console.log("Anomalies:", data.anomalies || []);
+  
+      // Update state with spread operator to force re-render
+      setInsights([...data.insights || []]);
+      setCorrelations([...data.correlations || []]);
+      setAnomalies([...data.anomalies || []]);
+  
+      // Calculate total pages based on the number of insights
+      setPageCount(Math.ceil((data.insights?.length || 0) / 10));
+  
+    } catch (error) {
+      console.error('Error fetching insights:', error);
+  
+      if (error.response) {
+        console.error('Server responded with:', error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Request error:', error.message);
+      }
+    }
+  };
+  
 
   const handlePageClick = (event) => {
     setCurrentPage(event.selected);
@@ -133,28 +158,32 @@ const fetchInsights = async () => {
         <button className="btn btn-primary mt-3" onClick={fetchInsights} disabled={!selectedTable}>Analyze Insights</button>
 
         {insights.length > 0 && (
-          <div className="mt-4">
-            <h3>Column Insights</h3>
-            <table className="table table-bordered table-striped">
-              <thead className="table-dark">
-                <tr>
-                  <th>Column</th><th>Missing Values</th><th>Duplicates</th><th>Most Common</th><th>Suggested Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {insights.slice(currentPage * 10, (currentPage + 1) * 10).map((insight, index) => (
-                  <tr key={index}>
-                    <td>{insight.column}</td>
-                    <td>{insight.missing_values}</td>
-                    <td>{insight.duplicates}</td>
-                    <td>{insight.most_common}</td>
-                    <td>{insight.suggested_action}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+  <div className="mt-4">
+    <h3>Column Insights</h3>
+    <div className="table-responsive">
+      <table className="table table-bordered table-striped">
+        <thead className="table-dark">
+          <tr>
+            {Object.keys(insights[0]).map((key, index) => (
+              <th key={index}>{key.replace(/_/g, ' ')}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {insights.slice(currentPage * 10, (currentPage + 1) * 10).map((insight, index) => (
+            <tr key={index}>
+              {Object.values(insight).map((value, i) => (
+                <td key={i}>{value !== null ? value : 'N/A'}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+
 
 {correlations.length > 0 && (
   <div className="mt-4">

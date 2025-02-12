@@ -21,28 +21,35 @@ const App = () => {
 
     const handleFileChange = (e) => setFile(e.target.files[0]);
 
-    const handleUpload = async () => {
-        if (!file) return;
-        const formData = new FormData();
-        formData.append('file', file);
-        try {
-            const response = await axios.post('http://localhost:5000/upload', formData);
-            if (response.status === 200) {
-                fetchTables();
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
-    const fetchTables = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/get_tables');
-            setTables(res.data.tables);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const handleUpload = async () => {
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+          const response = await axios.post('http://localhost:5000/upload', formData, { withCredentials: true });
+          if (response.status === 200) {
+              fetchTables();
+          }
+      } catch (error) {
+          console.error(error);
+      }
+  };
+  
+
+  const fetchTables = async () => {
+    try {
+        const res = await axios.get('http://localhost:5000/get_tables', {
+            withCredentials: true,  // Ensures session cookie is sent with the request
+        });
+        setTables(res.data.tables);
+    } catch (error) {
+        console.error('Error fetching tables:', error);
+    }
+};
+
+
+
 
     const handleTableSelect = async (e) => {
         const selectedTable = e.target.value;
@@ -99,20 +106,20 @@ const App = () => {
 
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    fetch("http://localhost:5000/check_session", {
-      method: "GET",
-      credentials: "include", // Required for cookies to be sent
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Session Data:", data); // Log response data
-        if (data.user) {
-          setUser(data.user);
-        }
-      })
-      .catch((err) => console.error("Error fetching session:", err));
-  }, []);
+ useEffect(() => {
+   fetch("http://localhost:5000/check_session", {
+     method: "GET",
+     credentials: "include", // Required for cookies to be sent
+   })
+     .then((res) => res.json())
+     .then((data) => {
+       console.log(`Session Data for User ${data.user_id}:`, data); // Log response data with user ID
+       if (data.user_id) {
+         setUser(data.username);
+       }
+     })
+     .catch((err) => console.error("Error fetching session:", err));
+ }, []);
 
 
 

@@ -17,7 +17,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:5000/login', { username, password }, { withCredentials: true });
-            if (response.status === 200) navigate('/land');
+            if (response.status === 200) navigate('/');
         } catch (error) {
             setError(error.response?.data?.error || 'Login failed');
         }

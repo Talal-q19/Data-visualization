@@ -441,7 +441,28 @@ def get_tables():
         print("Error:", str(e))  # Debug log
         return jsonify({'error': str(e)}), 500
 
+@app.route('/delete_table', methods=['POST'])
+def delete_table():
+    data = request.json
+    table_name = data.get('table_name')
 
+    if not table_name:
+        return jsonify({'error': 'Table name required'}), 400
+
+    # Relax the validation rules for table_name
+    # if not table_name.isidentifier():
+    #     return jsonify({'error': 'Invalid table name'}), 400
+
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(f"DROP TABLE IF EXISTS `{table_name}`")  # Use backticks for safety
+        conn.commit()
+        return jsonify({'message': f'Table {table_name} deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        pool.release(conn)
 
 
 

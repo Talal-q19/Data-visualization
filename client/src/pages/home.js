@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../images/logo.jpeg';
 import { Link } from 'react-router-dom';
+import { shiftRight } from 'three/tsl';
 
 const App = () => {
     const [file, setFile] = useState(null);
@@ -16,6 +17,11 @@ const App = () => {
     const [tableName, setTableName] = useState('');
     const [tables, setTables] = useState([]);
     const [editMode, setEditMode] = useState(false); // New state for toggle edit/display mode
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [tableToDelete, setTableToDelete] = useState('');
+
+    
+    
 
     const handleFileChange = (e) => setFile(e.target.files[0]);
 
@@ -138,22 +144,28 @@ const App = () => {
         }
     };
 
-    const handleTableDelete = async (table) => {
-        if (!table) return;
+ 
     
-        const confirmDelete = window.confirm(`Are you sure you want to delete table "${table}"?`);
-        if (!confirmDelete) return;
-    
-        try {
-            await axios.post('http://localhost:5000/delete_table', { table_name: table }, { withCredentials: true });
-            alert(`Table "${table}" deleted successfully!`);
-            setTableName('');
-            fetchTables(); // Refresh the list of tables
-        } catch (error) {
-            console.error('Error deleting table:', error);
-            alert('Failed to delete table.');
-        }
-    };
+const handleTableDelete = async () => {
+  console.log('tableToDelete:', tableToDelete);
+  if (!tableToDelete) return;
+  try {
+    const response = await axios.post(
+      'http://localhost:5000/delete_table',
+      JSON.stringify({ table_name: tableToDelete }), // Send as JSON object
+      { withCredentials: true, headers: { 'Content-Type': 'application/json' } } // Set Content-Type header
+    );
+    if (response.status === 200) {
+      console.log('Table deleted successfully');
+      setTableName('');
+      fetchTables();
+    }
+  } catch (error) {
+    console.error('Error deleting table:', error);
+    alert('Failed to delete table.');
+  }
+  setShowDeleteModal(false);
+};
     
 
     return (
@@ -204,18 +216,52 @@ const App = () => {
                 <br />
                 <div className="mb-4 d-flex align-items-center gap-2">
                     <input type="file" className="form-control" onChange={handleFileChange} />
-                    <button className="btn btn-dark" onClick={handleUpload}>Upload</button>
+                    <button style={{ fontSize: 12, padding: 2 }} className="btn btn-dark" onClick={handleUpload}>
+                      <i className="fas fa-upload" style={{ fontSize: 12 }} /> Upload
+                    </button>
                 </div>
 
+                <div className="container mt-4">
                 <div className="mb-4">
                     <h3>Select Table</h3>
-                    <select className="form-select" onChange={handleTableSelect} value={tableName}>
-                        <option value="">-- Select Table --</option>
-                        {tables.map((table, index) => (
-                            <option key={index} value={table}>{table}</option>
-                        ))}
-                    </select>
+                    <div className="d-flex gap-2">
+                        <select className="form-select" onChange={handleTableSelect} value={tableName}>
+                            <option value="">-- Select Table --</option>
+                            {tables.map((table, index) => (
+                                <option key={index} value={table}>{table}</option>
+                            ))}
+                        </select>
+                        {tableName && (
+                            <button className="btn btn-danger btn-sm" onClick={() => { setShowDeleteModal(true); setTableToDelete(tableName); }}>
+                                <i className="fas fa-trash-alt fa-sm"></i> Delete Table
+                            </button>
+                        )}
+                    </div>
                 </div>
+            </div>
+
+           {showDeleteModal && (
+             <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+               <div className="modal-dialog" role="document">
+                 <div className="modal-content">
+                  <div className="modal-header d-flex justify-content-between">
+                    <h5 className="modal-title">Confirm Deletion</h5>
+                    <button type="button" className="close" onClick={() => setShowDeleteModal(false)} style={{ color: 'red' }}>
+                      <span>&times;</span>
+                    </button>
+                  </div>
+                   <div className="modal-body">
+                     <p>Are you sure you want to delete the table "{tableToDelete}"?</p>
+                   </div>
+                   <div className="modal-footer">
+                     <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+                     <button type="button" className="btn btn-danger" onClick={handleTableDelete}>Delete</button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+
 
                 {columns.length > 0 && (
                     <div className="mb-4">
@@ -233,12 +279,24 @@ const App = () => {
                             ))}
                         </div>
                         <br />
-                        <button
-                        className="btn btn-primary"
-                        onClick={() => setEditMode(!editMode)}
-                    >
-                        {editMode ? 'Switch to Display Mode' : 'Switch to Edit Mode'}
-                    </button>
+                <button
+                  className="btn btn-dark"
+                  onClick={() => setEditMode(!editMode)}
+                >
+                  {editMode ? (
+                    <span>
+                      <i className="fas fa-eye" /> 
+                      <span style={{ marginLeft: 5 }}></span>
+                      Switch to Display Mode
+                    </span>
+                  ) : (
+                    <span>
+                      <i className="fas fa-edit" /> 
+                      <span style={{ marginLeft: 5 }}></span>
+                      Switch to Edit Mode
+                    </span>
+                  )}
+                </button>
                     </div>
                 )}
 
